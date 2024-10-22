@@ -8,9 +8,9 @@ const userRouter = require('./routes/userRoutes');
 const app = express();
 
 // Middleware
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// if (process.env.NODE_ENV === 'development') {
+//   app.use(morgan('dev'));
+// }
 
 app.use(express.json()); // middleware which sits between the request and the response to manipulate the data
 
