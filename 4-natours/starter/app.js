@@ -8,9 +8,13 @@ const userRouter = require('./routes/userRoutes');
 const app = express();
 
 // Middleware
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 app.use(express.json()); // middleware which sits between the request and the response to manipulate the data
+
+app.use(express.static(`${__dirname}/public`)); // allows for any static folders to be access via the url folder3
 
 app.use((req, res, next) => {
   console.log('hello from the middleware ☺️');
