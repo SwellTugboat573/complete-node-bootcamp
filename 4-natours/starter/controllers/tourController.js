@@ -1,5 +1,5 @@
 const Tour = require('../models/tourModels');
-
+const APIFeatures = require('./../utils/apiFeatures');
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 // );
@@ -23,9 +23,31 @@ const Tour = require('../models/tourModels');
 //   next();
 // };
 
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    //Execute Query
+    const features = new APIFeatures(Tour, req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .pagninate();
+
+    const tours = await features.query;
+
+    // const query = await Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+    //Send Response
     res.status(200).json({
       status: 'success',
       results: tours.length,
@@ -37,7 +59,7 @@ exports.getAllTours = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: 'fail',
-      message: err,
+      message: err.message,
     });
   }
 };
