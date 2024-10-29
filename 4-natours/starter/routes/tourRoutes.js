@@ -9,6 +9,9 @@ const router = express.Router();
 router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours); // middleware prefills the parameters so we only get the top 5 cheap
+
+router.route('/tour-stats').get(tourController.getTourStats);
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 router
   .route('/')
   .get(tourController.getAllTours)
