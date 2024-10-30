@@ -106,7 +106,7 @@ exports.updateTour = async (req, res) => {
   try {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
+      runValidators: true, // ensures that fields like max length(validators) are re checked when updating the field.
     });
 
     res.status(200).json({
