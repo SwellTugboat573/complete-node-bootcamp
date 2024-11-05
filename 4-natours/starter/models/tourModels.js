@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -9,7 +8,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       maxlength: [40, 'A tour name must be have =<40 Characters'],
-      maxlength: [10, 'A tour name must be have <=10 Characters'],
+      minlength: [10, 'A tour name must be have >=10 Characters'],
       // validate: [validator.isAlpha, 'Tour name must only contain characters'],
     },
     slug: {
@@ -28,14 +27,14 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'tour must havea difficulty'],
       enum: {
         values: ['easy', 'medium', 'difficult'],
-        message: 'Difficult is either: easy, medium,difficult',
+        message: 'Difficult is either: easy, medium, difficult',
       },
     },
     ratingsAverage: {
       type: Number,
       default: 0,
-      min: [1, 'rating must be above 1'],
-      max: [5, 'rating must be below 5'],
+      min: [1, 'Rating must be above 1'],
+      max: [5, 'Rating must be below 5'],
     },
     ratingQuantity: {
       type: Number,
@@ -51,7 +50,7 @@ const tourSchema = new mongoose.Schema(
         validator: function (val) {
           return val < this.price; // this is a custom field . this is the object it's currently. custom validators won't work on updates. this isn't available for update functions.
         },
-        message: 'discount price (${VALUE}) should be below regular price',
+        message: 'Discount price (${VALUE}) should be below regular price',
       },
     },
     summary: {
@@ -64,7 +63,7 @@ const tourSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, 'tour must have a cover image'],
+      required: [true, 'Tour must have a cover image'],
     },
     images: [String],
     createdAt: {
