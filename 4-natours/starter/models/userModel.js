@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a password'],
     minLength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -47,6 +48,15 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+//instance method that's availabe for all docuements on a collections. Means if we are inside the model we have access to this function without needing to import
+
+userSchema.methods.correctPassword = async function (
+  candiatePassword,
+  userPassword,
+) {
+  return await bcrypt.compare(candiatePassword, userPassword);
+};
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
