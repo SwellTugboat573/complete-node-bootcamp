@@ -45,13 +45,21 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpired: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
-// before it's savbed to the database
+// Start of middleware
+// before it's saved to the database
 userSchema.pre('save', async function (next) {
+  console.log('pre middlesware running.', this.password);
   // check if the password has been modified
   if (!this.isModified('password')) return next();
   // hash the pass word with cost / salt of 12 - the higher the number the more cpu it uses.
   this.password = await bcrypt.hash(this.password, 12);
+  console.log('pre middlesware run.', this.password);
   // removed the password confirmed.
   this.passwordConfirm = undefined;
   next();
@@ -62,6 +70,11 @@ userSchema.pre('save', async function (next) {
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000; // puts the time one second in the past as there can be time delays between this and the token creation date to ensure the token has been created after the password has changed.
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 

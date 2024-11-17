@@ -13,6 +13,15 @@ const signToken = (id) => {
   });
 };
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: { user },
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -21,14 +30,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
     role: req.body.role,
   });
-  const token = signToken(newUser._id);
-  res.status(201).json({
-    status: 'sucess',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -46,8 +48,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) if everything is okaay send token to client
-  const token = signToken(user._id);
-  res.status(200).json({ status: 'success', token });
+  createSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -86,6 +87,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  console.log('Protect middleware run');
   next();
 });
 // Need to destructure before you all middleware because you can't pass arugments into middleware. So by desctructuring and then returing the middleware we gain access to the variables we passed in.
@@ -165,6 +167,26 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   // 4) Log the user in, send JWT
   // 3) if everything is okaay send token to client
-  const token = signToken(user._id);
-  res.status(200).json({ status: 'success', token });
+  createSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from collection
+
+  const user = await User.findById(req.user.id).select('+password');
+  // console.log('req pw', req.body.password, 'user pw', user.password);
+
+  // 2) check if posted password is correct
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+    return next(new AppError('Your current pasword is wrong.', 401));
+  }
+
+  // 3) if, update datepassword
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordChangedAt = Date.now();
+  await user.save();
+  // using save
+  // 4) log user in send jwt
+  createSendToken(user, 200, res);
 });
