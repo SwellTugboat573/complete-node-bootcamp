@@ -37,22 +37,22 @@ const reviewSchema = mongoose.Schema(
   },
 );
 
-const Review = mongoose.model('Review', reviewSchema);
-
-module.exports = Review;
-
-reviewSchema.pre('save', function (next) {
-  const guidesPromises = this.user.map(async (id) => {
-    await User.findById(id);
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'user',
+    select: 'name photo',
   });
 
-  this.guides = Promise.All(guidesPromises);
+  // .populate({
+  //   path: 'tour',
+  //   select: 'name',
+  // })
   next();
 });
 
-reviewSchema.pre('save', function (next) {
-  const tourPromises = this.tour.map(async (id) => {
-    await Tour.findById(id);
-  });
-  this.tour = Promise.All(tourPromises);
-});
+const Review = mongoose.model('Review', reviewSchema);
+
+module.exports = Review;
+// Nested Get requests.
+// Post/tour/tourid/review/
+// Get/tour/tourid/review/

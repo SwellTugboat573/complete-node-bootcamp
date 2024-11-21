@@ -3,6 +3,10 @@ const fs = require('fs');
 const tourController = require('./../controllers/tourController');
 const router = express.Router();
 const authController = require('./../controllers/authController');
+const reviewRouter = require('./../routes/reviewRoutes');
+
+// a router is a middle ware don't forget..
+router.use('/:tourId/reviews', reviewRouter);
 
 //router.param('id', tourController.checkID);
 //router.param('/', tourController.checkBody);
@@ -27,5 +31,16 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTour,
   );
+// Post/tour/tourid/review/
+// Get/tour/tourid/review/
+
+// Removed becuase it wsa duplicate technically and didn't really belong.
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.protect,
+//     authController.restrictTo('user'),
+//     reviewController.createReview,
+//   );
 
 module.exports = router;

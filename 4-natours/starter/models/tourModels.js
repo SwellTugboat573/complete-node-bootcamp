@@ -117,6 +117,12 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
+// Virtual properties.
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', //the key in the other table
+  localField: '_id', //where the foriegn key is stored in the query.
+});
 //.pre = runs before the event middle ware is also a hook.
 // DOCUEMTN MIDDLEWARE: runs before .save and .cerat but not if .insertmany.
 tourSchema.pre('save', function (next) {
