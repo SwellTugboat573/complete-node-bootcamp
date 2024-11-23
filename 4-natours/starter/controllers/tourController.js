@@ -2,6 +2,7 @@ const Tour = require('../models/tourModels');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const factory = require('./handlerFactory');
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 // );
@@ -74,53 +75,47 @@ exports.getTour = catchAsync(async (req, res, next) => {
     },
   });
 });
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newtour = await Tour.create(req.body);
-  console.log(newtour);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newtour,
-    },
-  });
-  // using the catchAsync method which is being called and returning the function and it's requirements as it's called to allow the errors to be handled cleaner. alternatively they look like try - catch blocks.
-  // try{
-  // } catch (err) {
-  //   res.status(400).json({
-  //     status: 'failed to create',
-  //     Message: err, //'Invalid data sent!',
-  //   });
-  // }
-});
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
+// using the catchAsync method which is being called and returning the function and it's requirements as it's called to allow the errors to be handled cleaner. alternatively they look like try - catch blocks.
+// try{
+// } catch (err) {
+//   res.status(400).json({
+//     status: 'failed to create',
+//     Message: err, //'Invalid data sent!',
+//   });
+// }
+// });
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true, // ensures that fields like max length(validators) are re checked when updating the field.
-  });
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//     new: true,
+//     runValidators: true, // ensures that fields like max length(validators) are re checked when updating the field.
+//   });
 
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404)); // assumes there is an error
-  }
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
+//   if (!tour) {
+//     return next(new AppError('No tour found with that ID', 404)); // assumes there is an error
+//   }
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
 
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: null,
-  });
-});
+//   if (!tour) {
+//     return next(new AppError('No tour found with that ID', 404));
+//   }
+//   res.status(200).json({
+//     status: 'success',
+//     data: null,
+//   });
+// });
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
