@@ -1,30 +1,8 @@
 const Tour = require('../models/tourModels');
-const APIFeatures = require('./../utils/apiFeatures');
+
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
-// );
-// Shows how middle ware works.
-// exports.checkID = (req, res, next, val) => {
-//   if (req.params.id * 1 > tours.length) {
-//     return res.status(404).json({
-//       status: 'fail',
-//       message: 'invalid ID',
-//     });
-//   }
-//   next();
-// };
-// exports.checkBody = (req, res, next) => {
-//   if (!req.body.name || !req.body.price) {
-//     return res.status(404).json({
-//       status: 'fail',
-//       message: 'Missing name or price in request',
-//     });
-//   }
-//   next();
-// };
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -34,88 +12,12 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  //Execute Query
-  const features = new APIFeatures(Tour, req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .pagninate();
+exports.getAllTours = factory.getAll(Tour);
 
-  const tours = await features.query;
-
-  // const query = await Tour.find()
-  //   .where('duration')
-  //   .equals(5)
-  //   .where('difficulty')
-  //   .equals('easy');
-  //Send Response
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    requestedAt: req.requestTime,
-    data: {
-      tours,
-    },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    //results: tours.length,
-    requestedAt: req.requestTime,
-    data: {
-      tour,
-    },
-  });
-});
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);
-// using the catchAsync method which is being called and returning the function and it's requirements as it's called to allow the errors to be handled cleaner. alternatively they look like try - catch blocks.
-// try{
-// } catch (err) {
-//   res.status(400).json({
-//     status: 'failed to create',
-//     Message: err, //'Invalid data sent!',
-//   });
-// }
-// });
-
-// exports.updateTour = catchAsync(async (req, res, next) => {
-//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-//     new: true,
-//     runValidators: true, // ensures that fields like max length(validators) are re checked when updating the field.
-//   });
-
-//   if (!tour) {
-//     return next(new AppError('No tour found with that ID', 404)); // assumes there is an error
-//   }
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//       tour,
-//     },
-//   });
-// });
-
-// exports.deleteTour = catchAsync(async (req, res, next) => {
-//   const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
-
-//   if (!tour) {
-//     return next(new AppError('No tour found with that ID', 404));
-//   }
-//   res.status(200).json({
-//     status: 'success',
-//     data: null,
-//   });
-// });
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
@@ -193,3 +95,96 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+//////////////////////
+// MIDDLEWARE DEMO
+//////////////////////
+// const tours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
+// );
+// Shows how middle ware works.
+// exports.checkID = (req, res, next, val) => {
+//   if (req.params.id * 1 > tours.length) {
+//     return res.status(404).json({
+//       status: 'fail',
+//       message: 'invalid ID',
+//     });
+//   }
+//   next();
+// };
+// exports.checkBody = (req, res, next) => {
+//   if (!req.body.name || !req.body.price) {
+//     return res.status(404).json({
+//       status: 'fail',
+//       message: 'Missing name or price in request',
+//     });
+//   }
+//   next();
+// };
+
+///////////////////////////////////////////////////////
+// API FUNCTIONS BEFORE MAKING FACORTY HANDLERS
+///////////////////////////////////////////////////////
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+//   //Execute Query
+//   const features = new APIFeatures(Tour, req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .pagninate();
+
+//   const tours = await features.query;
+
+//   // const query = await Tour.find()
+//   //   .where('duration')
+//   //   .equals(5)
+//   //   .where('difficulty')
+//   //   .equals('easy');
+//   //Send Response
+//   res.status(200).json({
+//     status: 'success',
+//     results: tours.length,
+//     requestedAt: req.requestTime,
+//     data: {
+//       tours,
+//     },
+//   });
+// });
+
+// using the catchAsync method which is being called and returning the function and it's requirements as it's called to allow the errors to be handled cleaner. alternatively they look like try - catch blocks.
+// try{
+// } catch (err) {
+//   res.status(400).json({
+//     status: 'failed to create',
+//     Message: err, //'Invalid data sent!',
+//   });
+// }
+// });
+
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//     new: true,
+//     runValidators: true, // ensures that fields like max length(validators) are re checked when updating the field.
+//   });
+
+//   if (!tour) {
+//     return next(new AppError('No tour found with that ID', 404)); // assumes there is an error
+//   }
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
+
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndDelete(req.params.id, req.body);
+
+//   if (!tour) {
+//     return next(new AppError('No tour found with that ID', 404));
+//   }
+//   res.status(200).json({
+//     status: 'success',
+//     data: null,
+//   });
+// });

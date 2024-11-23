@@ -12,20 +12,6 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  //Send Response
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    requestedAt: req.requestTime,
-    data: {
-      users,
-    },
-  });
-});
-
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) create error if password data is posted
   if (req.body.password || req.body.passwordConfirm) {
@@ -66,14 +52,28 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined',
+    message:
+      'This route is not yet defined and never will be. Please use Sign up',
   });
 };
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-}; // do NOT update passwords with this!
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+// do NOT update passwords with this!
+
 exports.updateUsers = factory.updateOne(User);
 exports.deleteUsers = factory.deleteOne(User);
+
+//Original endpoint function befor making a factory Handler function
+// exports.getAllUsers = catchAsync(async (req, res, next) => {
+//   const users = await User.find();
+
+//   //Send Response
+//   res.status(200).json({
+//     status: 'success',
+//     results: users.length,
+//     requestedAt: req.requestTime,
+//     data: {
+//       users,
+//     },
+//   });
+// });
