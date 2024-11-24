@@ -1,20 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const userControler = require('./../controllers/usersController');
-const authControler = require('./../controllers/authController');
+const authController = require('./../controllers/authController');
 
-router.post('/signup', authControler.signup);
-router.post('/login', authControler.login);
-router.post('/forgotPassword', authControler.forgotpassword);
-router.patch('/resetPassword/:token', authControler.resetPassword);
-router.patch(
-  '/updateMyPassword',
-  authControler.protect,
-  authControler.updatePassword,
-);
-router.patch('/updateMe', authControler.protect, userControler.updateMe);
-router.delete('/deleteMe', authControler.protect, userControler.deleteMe);
+router.post('/signup', authController.signup);
+router.post('/login', authController.login);
+router.post('/forgotPassword', authController.forgotpassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
+// Protect all routes after
+router.use(authController.protect);
+// Must be logged in to use below
+router.patch('/updateMyPassword', authController.updatePassword);
+router.get('/me', userControler.getMe, userControler.getUser);
+router.patch('/updateMe', userControler.updateMe);
+router.delete('/deleteMe', userControler.deleteMe);
 
+router.use(authController.restrictTo('admin'));
 // The route
 router.route('/').get(userControler.getAllUsers).post(userControler.createUser);
 

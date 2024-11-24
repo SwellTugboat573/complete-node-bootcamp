@@ -36,7 +36,6 @@ exports.updateOne = (model) =>
 exports.createOne = (model) =>
   catchAsync(async (req, res, next) => {
     const data = await model.create(req.body);
-    console.log(newtour);
     res.status(201).json({
       status: 'success',
       data: {
@@ -81,6 +80,8 @@ exports.getAll = (Model) =>
       .pagninate();
 
     const doc = await features.query;
+    // EXPLAIN wil add the query details to the result allowing you to review the amount of data being processed to better improve query performance via indexing.
+    // const doc = await features.query.explain();
 
     // const query = await Tour.find()
     //   .where('duration')

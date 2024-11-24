@@ -37,17 +37,59 @@ const reviewSchema = mongoose.Schema(
   },
 );
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
     select: 'name photo',
   });
-
-  // .populate({
-  //   path: 'tour',
-  //   select: 'name',
-  // })
   next();
+});
+
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  // aggregate can only be used on the model. hence using a function and not =>.
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsAverage: stats[0].avgRating,
+      ratingQuantity: stats[0].nRating,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsAverage: 4.5,
+      ratingQuantity: 0,
+    });
+  }
+};
+// use post not pre save middleware because otherwise the reviews won't be yet saved in the function.
+reviewSchema.post('save', function (next) {
+  // this points to the current review.
+  this.constructor.calcAverageRatings(this.tour);
+  next;
+});
+
+// CALCUALTE AND UDPATE THE AVERAGE RATINGS WHEN UPDATING AND DELETING
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  // We dont access to the documents but only the query so by using the findOneAnd regular expression we can this look up the docuements as the this key word would be the model
+  // Clone the query to fetch the document safely without affecting the original query
+  this.r = await this.clone().findOne(); //saving the review to the this variable for access in the post
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);

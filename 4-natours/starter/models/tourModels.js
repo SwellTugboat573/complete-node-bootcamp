@@ -37,6 +37,7 @@ const tourSchema = new mongoose.Schema(
       default: 0,
       min: [1, 'Rating must be above 1'],
       max: [5, 'Rating must be below 5'],
+      set: (val) => Math.round(val * 10) / 10,
     },
     ratingQuantity: {
       type: Number,
@@ -108,10 +109,13 @@ const tourSchema = new mongoose.Schema(
       },
     ],
   },
-  { toJSON: { virtuals: true } },
-  { toObject: { virtuals: true } },
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
+// tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ 'startLocation.corrdinates': '2dsphere' });
 // regular function was used because of the require,ent of the this key work. arrow functions don't recieve a this keywork. This virtual value will only appear in the system and not to the database.
 // done in the model to keep the model thick and the controller thin.
 tourSchema.virtual('durationWeeks').get(function () {
@@ -143,17 +147,17 @@ tourSchema.pre('save', function (next) {
 //QUERY MIDDLEWARE
 // changing the save to find makes it query middleware. Good to use if only for vip clients.
 // tourSchema.pre('find', function (next) this only is for the find method . make it a regular expression like above to get all queries that contain/start w/ find.
-tourSchema.pre(/^find/, function (next) {
-  this.find({ secretTour: { $ne: true } });
-
-  this.start = Date.now();
-  next();
-});
-
 tourSchema.pre('save', async function (next) {
   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
 
   this.guides = await Promise.all(guidesPromises);
+  next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+
+  this.start = Date.now();
   next();
 });
 
@@ -173,11 +177,11 @@ tourSchema.post(/^find/, function (docs, next) {
 
 //AGGREGATION MIDDLEWARE
 
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log(this.pipeline(), 'pre aggregrrate called');
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   console.log(this.pipeline(), 'pre aggregrrate called');
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 

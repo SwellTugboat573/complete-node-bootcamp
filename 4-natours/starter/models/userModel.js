@@ -59,7 +59,6 @@ userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   // hash the pass word with cost / salt of 12 - the higher the number the more cpu it uses.
   this.password = await bcrypt.hash(this.password, 12);
-  console.log('pre middlesware run.', this.password);
   // removed the password confirmed.
   this.passwordConfirm = undefined;
   next();
