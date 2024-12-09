@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
@@ -11,8 +12,16 @@ const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serving static Files
+app.use(express.static(`${__dirname}/public`)); // allows for any static folders to be access via the url folder
+app.use(express.static(path.join(__dirname, 'public'))); // allows for any static folders to be access via the url folder
 
 // Global Middleware
 //Security HTTPS
@@ -53,8 +62,6 @@ app.use(
 
 // Data sanitization against NoSQL query Injection
 app.use(mongoSanitize());
-// Serving static Files
-app.use(express.static(`${__dirname}/public`)); // allows for any static folders to be access via the url folder
 
 // app.use((req, res, next) => {
 //   console.log('hello from the middleware ☺️');
@@ -67,6 +74,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
