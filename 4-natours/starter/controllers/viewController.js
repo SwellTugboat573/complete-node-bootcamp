@@ -23,9 +23,9 @@ exports.getTour = catchAsync(async (req, res) => {
   });
 
   // 3) Render Template using data from 1
-
+  console.log(tour.reviews[0].user.photo);
   res.status(200).render('tour', {
-    title: 'The Forest Hiker Tour',
+    title: `${tour.name} tour`,
     tour,
   });
 });
