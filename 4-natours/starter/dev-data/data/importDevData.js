@@ -6,8 +6,8 @@ const Review = require('./../../models/reviewModels');
 const User = require('./../../models/userModel');
 dotenv.config({ path: './config.env' });
 
-console.log('Database URL:', process.env.DATABASE);
-console.log(__dirname);
+// console.log('Database URL:', process.env.DATABASE);
+// console.log(__dirname);
 
 const dataBase =
   'mongodb+srv://zacs:<PASSWORD>@cluster0.xhh1e.mongodb.net/natours?retryWrites=true&w=majority&appName=Cluster0';
@@ -31,7 +31,7 @@ const importData = async () => {
     await Tour.create(tours);
     await User.create(users, { validateBeforeSave: false });
     await Review.create(reviews);
-    console.log('data successfully loaded!');
+    // console.log('data successfully loaded!');
     process.exit();
   } catch (err) {
     console.log(err);
@@ -43,7 +43,7 @@ const deleteData = async () => {
     await Tour.deleteMany();
     await User.deleteMany();
     await Review.deleteMany();
-    console.log('data successfully deleted!');
+    // console.log('data successfully deleted!');
     process.exit();
   } catch (err) {
     console.log(err);
@@ -56,4 +56,4 @@ if (process.argv[2] === '--import') {
   deleteData();
 }
 
-console.log(process.argv);
+// console.log(process.argv);
