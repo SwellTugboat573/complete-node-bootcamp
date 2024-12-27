@@ -54,7 +54,6 @@ const userSchema = new mongoose.Schema({
 // Start of middleware
 // before it's saved to the database
 userSchema.pre('save', async function (next) {
-  console.log('pre middlesware running.', this.password);
   // check if the password has been modified
   if (!this.isModified('password')) return next();
   // hash the pass word with cost / salt of 12 - the higher the number the more cpu it uses.
@@ -105,7 +104,6 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
 
-  console.log({ resetToken }, this.passwordResetToken);
   this.passwordResetExpired = Date.now() + 10 * 60 * 1000;
   return resetToken;
 };

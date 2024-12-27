@@ -71,6 +71,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -99,10 +101,34 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
-  console.log(req.user);
-  console.log('Protect middleware run');
   next();
 });
+// only for rendered pages will neer return errror
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+
+    //1) verification token with jwt algorithim
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
+
+    // 2) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+
+    // 3) Check if user changed password after the JWT was issued.
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    // There is a logged in user
+    res.locals.user = currentUser;
+    return next();
+  }
+  next();
+});
+
 // Need to destructure before you all middleware because you can't pass arugments into middleware. So by desctructuring and then returing the middleware we gain access to the variables we passed in.
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
