@@ -14,8 +14,6 @@ export const login = async (email, password) => {
       // httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Ignore SSL errors
     });
 
-    console.log(res);
-
     if (res.data.status === 'success') {
       showAlert('success', 'Logged in successfully!');
       window.setTimeout(() => {
@@ -25,5 +23,17 @@ export const login = async (email, password) => {
   } catch (err) {
     console.log(err);
     showAlert('error', err.response?.data?.message);
+  }
+};
+
+export const logout = async () => {
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/users/logout',
+    });
+    if ((res.data.status = 'success')) location.reload(true); // true allows it to be reloaded from the server and not cache.
+  } catch (err) {
+    showAlert('error', 'Error logging out! Try again.');
   }
 };

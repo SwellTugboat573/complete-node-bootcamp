@@ -63,6 +63,14 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
   // 1) getting token and check if it's there
@@ -101,33 +109,37 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  res.locals.user = currentUser;
   next();
 });
 // only for rendered pages will neer return errror
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
     token = req.cookies.jwt;
+    try {
+      //1) verification token with jwt algorithim
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET,
+      );
 
-    //1) verification token with jwt algorithim
-    const decoded = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET,
-    );
+      // 2) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
 
-    // 2) Check if user still exists
-    const currentUser = await User.findById(decoded.id);
+      // 3) Check if user changed password after the JWT was issued.
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
 
-    // 3) Check if user changed password after the JWT was issued.
-    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      // There is a logged in user
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
       return next();
     }
-
-    // There is a logged in user
-    res.locals.user = currentUser;
-    return next();
   }
   next();
-});
+};
 
 // Need to destructure before you all middleware because you can't pass arugments into middleware. So by desctructuring and then returing the middleware we gain access to the variables we passed in.
 exports.restrictTo = (...roles) => {
