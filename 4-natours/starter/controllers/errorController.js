@@ -56,6 +56,7 @@ const sendErrorProd = (err, req, res) => {
     // B) Programing or other unknown error:don't leak error details to the client.
     // 1) log the error
     console.error('Error💥', err);
+    console.error('error body 🤷🏼‍♂️', err.response.body.errors);
     //send generic message
     return res.status(500).json({
       status: 'error',
