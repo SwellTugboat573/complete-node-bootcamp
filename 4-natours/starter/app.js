@@ -13,6 +13,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const bookingsRouter = require('./routes/bookingRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 
@@ -22,7 +23,7 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 // Serving static Files
-app.use(express.static(`${__dirname}/public`)); // allows for any static folders to be access via the url folder
+// app.use(express.static(`${__dirname}/public`)); // allows for any static folders to be access via the url folder
 app.use(express.static(path.join(__dirname, 'public'))); // allows for any static folders to be access via the url folder
 
 // Global Middleware
@@ -169,6 +170,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingsRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
