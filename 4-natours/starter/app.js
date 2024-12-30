@@ -13,11 +13,14 @@ const cors = require('cors');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
+
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const bookingsRouter = require('./routes/bookingRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
+
+const bookingController = require('./controllers/bookingController');
 
 const app = express();
 
@@ -56,6 +59,12 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   message: ' Too many requests from  this IP, please try again in an hour!',
 });
+// put here because otherwise the data is passed as json at line 67.
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout,
+);
 
 app.use('/api', limiter); // affects all the
 //body parser, reading data from body into req.body
