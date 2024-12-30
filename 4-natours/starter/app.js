@@ -9,6 +9,8 @@ const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const csp = require('express-csp');
 const compression = require('compression');
+const cors = require('cors');
+
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
@@ -25,6 +27,19 @@ app.set('views', path.join(__dirname, 'views'));
 // Serving static Files
 // app.use(express.static(`${__dirname}/public`)); // allows for any static folders to be access via the url folder
 app.use(express.static(path.join(__dirname, 'public'))); // allows for any static folders to be access via the url folder
+
+//CORSS
+// impletment Cors - cross origin - for simply request - get & put
+//important if api is on a subdomain and it's being called from the main domain.
+// sets access-controll-allow-origin
+app.use(cors());
+//to allow a specific domain and not public
+// app.use(cors({origin:'https://www.natours.com'}))
+// browser sends an options request
+// Sets for all the end points
+app.options('*', cors());
+//sets for one endpoint
+// app.options('/api/v1/tours/:id', cors());
 
 // Global Middleware
 //Security HTTPS
