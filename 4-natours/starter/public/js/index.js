@@ -35,7 +35,7 @@ if (userDataForm)
     form.append('name', document.getElementById('name').value);
     form.append('email', document.getElementById('email').value);
     form.append('photo', document.getElementById('photo').files[0]); // the files is an array
-    console.log(form);
+
     updateSettings(form, 'data');
   });
 

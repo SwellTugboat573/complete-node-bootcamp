@@ -56,7 +56,7 @@ const sendErrorProd = (err, req, res) => {
     // B) Programing or other unknown error:don't leak error details to the client.
     // 1) log the error
     console.error('Error💥', err);
-    console.error('error body 🤷🏼‍♂️', err.response.body.errors);
+
     //send generic message
     return res.status(500).json({
       status: 'error',
@@ -91,7 +91,7 @@ module.exports = (err, req, res, next) => {
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
     error.message = err.message;
-    console.log('the let error 👉🏼', err);
+
     if (err.name === 'CastError') error = handleCastErrorDB(error);
     if (err.code === 11000) error = handleDuplicateFieldsDB(error);
     if (err.name === 'ValidationError') error = handlEvalidationErrorDB(error);
